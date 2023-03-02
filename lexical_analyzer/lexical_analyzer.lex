@@ -9,6 +9,7 @@ LETTER    [a-zA-Z]
 INTEGER_LITERAL ("-")?{DIGIT}+
 BOOLEAN_LITERAL true|false
 STRING_LITERAL \"[^\n"]*\"
+WRONG_STRING_LITERAL \"[^\n"]*
 NULL_LITERAL null
 
 KEYWORDS "class"|"static"|"extends"
@@ -23,8 +24,8 @@ LOGICAL_OP "&&"|"||"|"!"|"!="
 REL_OP "<"|">"|"<="|">="|"=="
 UNARY "++"|"--"
 
-IDENTIFIER        ({LETTER}|"_")({LETTER}|{DIGIT}|"_")*
-NONIDENTIFIER  {DIGIT}({LETTER}|{DIGIT}|"_")*
+IDENTIFIER        ({LETTER}|_)({LETTER}|{DIGIT}|_)*
+NONIDENTIFIER  {DIGIT}({LETTER}|{DIGIT}|_)*
 
 OPENING_PARENTHESIS  \(
 CLOSING_PARENTHESIS  \)
@@ -44,7 +45,12 @@ COMMENT       "//".*|"/*"(.*[\n].*)*"*/"
 {BL}                                  /* no actions */
 
 "\n"			                      /* no actions */
+{NULL_LITERAL} {printf("%s\t ==> NULL \n",yytext);}
+"System.out.println"                        { printf("%s\t ==> PRINT KEYWORD \n",yytext); }
 
+"this"                                      { printf("%s\t ==> THIS KEYWORD \n",yytext); }
+
+"new"                                       { printf("%s\t ==>  NEW OPERATOR \n",yytext); }
 
 {COMMENT}         		      /* no actions */
 
@@ -58,26 +64,26 @@ COMMENT       "//".*|"/*"(.*[\n].*)*"*/"
 
 {KEYWORDS} {printf("%s\t==> KEYWORDS\n",yytext);}
 
-{IDENTIFIER} {printf("%s\t==> IDENTIFIER\n",yytext);}
 
 {INTEGER_LITERAL}                           { printf( "%s\t ==> INTEGER_LITERAL \n",yytext) ; }
 
 {BOOLEAN_LITERAL}                           { printf( "%s\t ==> BOOLEAN_LITERAL \n",yytext) ; }
 
+{WRONG_STRING_LITERAL}                      { printf( "%s\t ==> WRONG STRING_LITERAL \n",yytext) ; }
+
 {STRING_LITERAL}                            { printf( "%s\t ==> STRING_LITERAL \n",yytext) ; }
+
+{IDENTIFIER} {printf("%s\t==> IDENTIFIER\n",yytext);}
 
 {NONIDENTIFIER} {printf("%s\t==> NONIDENTIFIER\n",yytext);}
 
-"System.out.println"                        { printf("%s\t ==> PRINT KEYWORD \n",yytext); }
-"this"                                      { printf("%s\t ==> THIS KEYWORD \n",yytext); }
-"new"                                       { printf("%s\t ==>  NEW OPERATOR \n",yytext); }
-"=" {printf("%s\t==> ASSIGNMENT OP\n",yytext);}
+= {printf("%s\t==> ASSIGNMENT OP\n",yytext);}
 
 {SEMICOLON} {printf("%s\t==> SEMICOLON\n",yytext);}
 
 {UNARY} {printf("%s\t==> UNARY OP\n",yytext);}
 
-{ARITH_OP} {printf("%s\t==> ARITHMETIC OPERATOR\n",yytext);}
+{ARITH_OP} {printf("%s\t==> ARITHMETIC OP\n",yytext);}
 
 {LOGICAL_OP} {printf("%s\t==> LOGICAL OP\n",yytext);}
 

@@ -4,9 +4,10 @@ public class Test2 {
     */
     public static void main(String[] args) {
         this.degla = new Degla();
-        bool ba3 = true;
+        boolean ba3 = true;
+        int 1x = 15;
         int z = x / y;
-        string wrong = "asdf asd fasd;
+        String wrong = "asdf asd fasd;
         System.out.println("The result is " + z);
     } 
 }
