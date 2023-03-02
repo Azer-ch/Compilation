@@ -3,6 +3,7 @@
 DELIM     [ \t]
 BL        {DELIM}+
 SEMICOLON ";"
+DOT "."
 DIGIT   [0-9]
 LETTER    [a-zA-Z]
 
@@ -19,24 +20,25 @@ CONDITIONAL "if"|"else"|"else if"|"switch"|"case"
 ITERATIVE "for"|"while"|"do"
 IMPORT "import"[^\n]*";"
 
-ARITH_OP "+"|"-"|"/"|"%"|"*";
+ARITH_OP "+"|"-"|"/"|"%"|"*"
 LOGICAL_OP "&&"|"||"|"!"|"!="
 REL_OP "<"|">"|"<="|">="|"=="
 UNARY "++"|"--"
 
 IDENTIFIER        ({LETTER}|_)({LETTER}|{DIGIT}|_)*
-NONIDENTIFIER  {DIGIT}({LETTER}|{DIGIT}|_)*
+NONIDENTIFIER  ({DIGIT}({LETTER}|{DIGIT}|_)*)
 
-OPENING_PARENTHESIS  \(
-CLOSING_PARENTHESIS  \)
+OPENING_PARENTHESIS  (\()
+CLOSING_PARENTHESIS  (\))
 
-OPENING_CURLY_BRACKETS  \{
-CLOSING_CURLY_BRACKETS  \}
+OPENING_CURLY_BRACKETS  (\{)
+CLOSING_CURLY_BRACKETS  (\})
 
-OPENING_BRACKET  \[
-CLOSING_BRACKET  \]
+OPENING_BRACKET  (\[)
+CLOSING_BRACKET  (\])
 
 COMMENT       "//".*|"/*"(.*[\n].*)*"*/"
+ERROR_COMMENT                   \/\*([^(\*\/)]|\n)*
 
 %%
 
@@ -45,7 +47,9 @@ COMMENT       "//".*|"/*"(.*[\n].*)*"*/"
 {BL}                                  /* no actions */
 
 "\n"			                      /* no actions */
+
 {NULL_LITERAL} {printf("%s\t ==> NULL \n",yytext);}
+
 "System.out.println"                        { printf("%s\t ==> PRINT KEYWORD \n",yytext); }
 
 "this"                                      { printf("%s\t ==> THIS KEYWORD \n",yytext); }
@@ -53,6 +57,8 @@ COMMENT       "//".*|"/*"(.*[\n].*)*"*/"
 "new"                                       { printf("%s\t ==>  NEW OPERATOR \n",yytext); }
 
 {COMMENT}         		      /* no actions */
+
+{ERROR_COMMENT} { printf("%s\t==> ERROR_COMMENT AT LINE%d\n",yytext,yylineno);}
 
 {CONDITIONAL} { printf("%s\t==> CONDITIONAL\n",yytext);}
 
@@ -69,17 +75,19 @@ COMMENT       "//".*|"/*"(.*[\n].*)*"*/"
 
 {BOOLEAN_LITERAL}                           { printf( "%s\t ==> BOOLEAN_LITERAL \n",yytext) ; }
 
-{WRONG_STRING_LITERAL}                      { printf( "%s\t ==> WRONG STRING_LITERAL \n",yytext) ; }
+{WRONG_STRING_LITERAL}                      { printf( "%s\t ==> WRONG STRING_LITERAL AT LINE %d\n",yytext,yylineno) ; }
 
 {STRING_LITERAL}                            { printf( "%s\t ==> STRING_LITERAL \n",yytext) ; }
 
 {IDENTIFIER} {printf("%s\t==> IDENTIFIER\n",yytext);}
 
-{NONIDENTIFIER} {printf("%s\t==> NONIDENTIFIER\n",yytext);}
+{NONIDENTIFIER} {printf("%s\t==> NONIDENTIFIER AT LINE %d\n",yytext,yylineno);}
 
 = {printf("%s\t==> ASSIGNMENT OP\n",yytext);}
 
 {SEMICOLON} {printf("%s\t==> SEMICOLON\n",yytext);}
+
+{DOT} {printf("%s\t==> DOT\n",yytext);}
 
 {UNARY} {printf("%s\t==> UNARY OP\n",yytext);}
 

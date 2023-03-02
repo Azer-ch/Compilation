@@ -1,0 +1,5 @@
+program tp1;
+begin
+int i=3;
+45a;
+end
