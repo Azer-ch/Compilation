@@ -1,16 +1,17 @@
 %option yylineno
 
-DELIM     [ \t]
+DELIM     [ \s]
 BL        {DELIM}+
 SEMICOLON ";"
 DOT "."
 DIGIT   [0-9]
 LETTER    [a-zA-Z]
+ERROR_CHARACTER .
 
 INTEGER_LITERAL ("-")?{DIGIT}+
 BOOLEAN_LITERAL true|false
-STRING_LITERAL \"[^\n"]*\"
-WRONG_STRING_LITERAL \"[^\n"]*
+STRING_LITERAL \"([^"\n]|\"\")+\"
+WRONG_STRING_LITERAL \"([^"\n]|\"\")+
 NULL_LITERAL null
 
 KEYWORDS "class"|"static"|"extends"
@@ -23,10 +24,12 @@ IMPORT "import"[^\n]*";"
 ARITH_OP "+"|"-"|"/"|"%"|"*"
 LOGICAL_OP "&&"|"||"|"!"|"!="
 REL_OP "<"|">"|"<="|">="|"=="
+BITWISE_OP "&"|"|"|"^"
 UNARY "++"|"--"
+ACCEPTED_SPECIAL _|$
 
-IDENTIFIER        ({LETTER}|_)({LETTER}|{DIGIT}|_)*
-NONIDENTIFIER  ({DIGIT}({LETTER}|{DIGIT}|_)*)
+IDENTIFIER        ({LETTER}|{ACCEPTED_SPECIAL})({LETTER}|{DIGIT}|{ACCEPTED_SPECIAL})*
+NONIDENTIFIER  ({DIGIT}({LETTER}|{DIGIT}|_)+)
 
 OPENING_PARENTHESIS  (\()
 CLOSING_PARENTHESIS  (\))
@@ -37,7 +40,8 @@ CLOSING_CURLY_BRACKETS  (\})
 OPENING_BRACKET  (\[)
 CLOSING_BRACKET  (\])
 
-COMMENT       "//".*|"/*"(.*[\n].*)*"*/"
+COMMENT_BLOCK                  "/*"([^*]|\*+[^*/])*\*+"/"
+COMMENT_LINE                   "//".*\n
 ERROR_COMMENT                   \/\*([^(\*\/)]|\n)*
 
 %%
@@ -46,7 +50,8 @@ ERROR_COMMENT                   \/\*([^(\*\/)]|\n)*
 
 {BL}                                  /* no actions */
 
-"\n"			                      /* no actions */
+"\n"	                            /* no actions */
+"\r"                             /* no actions */
 
 {NULL_LITERAL} {printf("%s\t ==> NULL \n",yytext);}
 
@@ -56,9 +61,7 @@ ERROR_COMMENT                   \/\*([^(\*\/)]|\n)*
 
 "new"                                       { printf("%s\t ==>  NEW OPERATOR \n",yytext); }
 
-{COMMENT}         		      /* no actions */
-
-{ERROR_COMMENT} { printf("%s\t==> ERROR_COMMENT AT LINE%d\n",yytext,yylineno);}
+{DOT} { printf("%s\t ==> DOT \n",yytext); }
 
 {CONDITIONAL} { printf("%s\t==> CONDITIONAL\n",yytext);}
 
@@ -75,19 +78,16 @@ ERROR_COMMENT                   \/\*([^(\*\/)]|\n)*
 
 {BOOLEAN_LITERAL}                           { printf( "%s\t ==> BOOLEAN_LITERAL \n",yytext) ; }
 
-{WRONG_STRING_LITERAL}                      { printf( "%s\t ==> WRONG STRING_LITERAL AT LINE %d\n",yytext,yylineno) ; }
 
 {STRING_LITERAL}                            { printf( "%s\t ==> STRING_LITERAL \n",yytext) ; }
 
 {IDENTIFIER} {printf("%s\t==> IDENTIFIER\n",yytext);}
 
-{NONIDENTIFIER} {printf("%s\t==> NONIDENTIFIER AT LINE %d\n",yytext,yylineno);}
 
 = {printf("%s\t==> ASSIGNMENT OP\n",yytext);}
 
 {SEMICOLON} {printf("%s\t==> SEMICOLON\n",yytext);}
 
-{DOT} {printf("%s\t==> DOT\n",yytext);}
 
 {UNARY} {printf("%s\t==> UNARY OP\n",yytext);}
 
@@ -96,6 +96,8 @@ ERROR_COMMENT                   \/\*([^(\*\/)]|\n)*
 {LOGICAL_OP} {printf("%s\t==> LOGICAL OP\n",yytext);}
 
 {REL_OP} {printf("%s\t==> RELATIONAL OP\n",yytext);}
+
+{BITWISE_OP} {printf("%s\t==> BITWISE OP\n",yytext);}
 
 {OPENING_PARENTHESIS}                     {printf("%s\t ==> PARENTHESIS_OPEN \n",yytext);}
 
@@ -108,6 +110,18 @@ ERROR_COMMENT                   \/\*([^(\*\/)]|\n)*
 {OPENING_CURLY_BRACKETS}                            {printf("%s\t ==> CURLY_BRACKET_OPEN \n ",yytext);}
 
 {CLOSING_CURLY_BRACKETS}                             {printf("%s\t ==> CURLY_BRACKET_CLOSE \n ",yytext);}
+
+{COMMENT_LINE}         		      /* no actions */
+
+{COMMENT_BLOCK}         		      /* no actions */
+
+{NONIDENTIFIER} {printf("%s\t==> NONIDENTIFIER AT LINE %d\n",yytext,yylineno);}
+
+{WRONG_STRING_LITERAL}                      {printf( "%s\t ==> WRONG STRING_LITERAL AT LINE %d\n",yytext,yylineno) ; }
+
+{ERROR_COMMENT} { printf("%s\t==> ERROR_COMMENT\n",yytext);}
+
+{ERROR_CHARACTER} {printf("%s\t ==> ERROR CHARACTER\n",yytext);}
 
 %%
 int main(int argc, char *argv[])

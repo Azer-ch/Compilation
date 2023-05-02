@@ -2,7 +2,17 @@
  #include <stdio.h>	
  #include <stdlib.h>	
  #include "javaComp.tab.h"	                                                                         	
-#include <math.h>	 			
+ #include <math.h>	 			
+ #include<string.h>
+
+
+ int errorCount = 0;
+ int warningCount = 0;
+ extern char name[];
+ void yyerror(char const *msg);
+ void lexicalError(char const *msg);
+ void semanticError(char const *msg);
+ void semanticWarning(char *msg);
 %}
 
 %option yylineno
@@ -74,7 +84,7 @@ ERROR_COMMENT                   \/\*([^(\*\/)]|\n)*
 
 {STRING_LITERAL}                            return STRING_LITERAL;
 
-{IDENTIFIER} return IDENTIFIER;
+{IDENTIFIER} {strcpy(name,yytext);return IDENTIFIER;}
 
 {SEMI_COLON} return SEMI_COLON;
 
@@ -114,16 +124,36 @@ ERROR_COMMENT                   \/\*([^(\*\/)]|\n)*
 
 {COMMENT_BLOCK}         		      /* no actions */
 
-{NONIDENTIFIER} {fprintf(stderr,"%s\t==> NONIDENTIFIER AT LINE %d\n",yytext,yylineno);}
+{NONIDENTIFIER} {lexicalError("illegal identifier");}
 
-{WRONG_STRING_LITERAL}                      {fprintf(stderr, "%s\t ==> WRONG STRING_LITERAL AT LINE %d\n",yytext,yylineno) ; }
+{WRONG_STRING_LITERAL}                      {lexicalError("illegal string literal");}
 
-{ERROR_COMMENT} { fprintf(stderr,"%s\t==> ERROR_COMMENT\n",yytext);}
+{ERROR_COMMENT} {lexicalError("illegal comment");}
 
 
 %%
-
+void yyerror(char const *msg) {
+     errorCount++;
+	fprintf(stderr, "%s at line %d\n",msg,yylineno);
+}
 int yywrap()
 {
      return(1);
+}
+void lexicalError(const char* msg){
+     char errorStr[200];
+     sprintf(errorStr,"Lexical error :%s",msg);
+     yyerror(errorStr);
+}
+void semanticError (const char *str){
+    char errstr[200];
+    sprintf(errstr,"Semantic error  : %s",str);
+    yyerror(errstr);
+}
+void semanticWarning (char *nom){
+    warningCount++;
+    char errstr[200];
+    sprintf(errstr,"Semantic warning : declared variable is not used: %s",nom);
+    yyerror(errstr);
+    errorCount--;
 }

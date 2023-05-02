@@ -1,13 +1,16 @@
 %{
-    #include <stdio.h>
-    #include <stdlib.h>
-    #include <string.h>
-
-
-    int yyerror(char const *msg);	
-
-	int yylex(void);
+     #include <stdio.h>
+     #include <stdlib.h>
+     #include <string.h>
+     #include "semantic.c"
+     void yyerror(char const *msg);	
+     int yylex(void);
 	extern int yylineno;
+     extern int errorCount;
+     extern int warningCount;
+     void beginSemantic();
+     void endSemantic();
+     char name[256];
 %}
 
 %token IDENTIFIER
@@ -72,37 +75,37 @@ MainClass              : MainClassDeclaration MainClassBody
 NestedClassDeclaration	   : ClassDeclaration NestedClassDeclaration
                        |
                        ;
-MainClassDeclaration               : SimpleClassHeader CURLY_BRACKET_OPEN KEYWORD_PUBLIC KEYWORD_STATIC KEYWORD_VOID KEYWORD_MAIN PARENTHESIS_OPEN TYPE_STRING BRACKET_OPEN BRACKET_CLOSE IDENTIFIER PARENTHESIS_CLOSE
+MainClassDeclaration               : SimpleClassHeader CURLY_BRACKET_OPEN KEYWORD_PUBLIC KEYWORD_STATIC KEYWORD_VOID KEYWORD_MAIN{g_type = tVoid; checkFuncID("main");} PARENTHESIS_OPEN TYPE_STRING{g_type = tString;} BRACKET_OPEN BRACKET_CLOSE IDENTIFIER{checkVarID(name);} PARENTHESIS_CLOSE{funcDecEnd();}
                        ;
-MainClassBody               :  CURLY_BRACKET_OPEN MultipleStatements  CURLY_BRACKET_CLOSE MultipleMethodsDeclaration CURLY_BRACKET_CLOSE 
+MainClassBody               :  CURLY_BRACKET_OPEN MultipleStatements  CURLY_BRACKET_CLOSE{endFunction();} MultipleMethodsDeclaration CURLY_BRACKET_CLOSE{endClass();}
                        ;
-ClassDeclaration       : SimpleClassHeader KEYWORD_EXTENDS IDENTIFIER CURLY_BRACKET_OPEN MultipleVariablesDeclaration MultipleMethodsDeclaration CURLY_BRACKET_CLOSE 
-                       | SimpleClassHeader CURLY_BRACKET_OPEN MultipleVariablesDeclaration MultipleMethodsDeclaration CURLY_BRACKET_CLOSE 
+ClassDeclaration       : SimpleClassHeader KEYWORD_EXTENDS IDENTIFIER{checkClassID(name);} CURLY_BRACKET_OPEN MultipleVariablesDeclaration MultipleMethodsDeclaration CURLY_BRACKET_CLOSE{endClass();} 
+                       | SimpleClassHeader CURLY_BRACKET_OPEN MultipleVariablesDeclaration MultipleMethodsDeclaration CURLY_BRACKET_CLOSE{endClass();} 
                        ;
-SimpleClassHeader              : KEYWORD_CLASS IDENTIFIER
-                         | KEYWORD_PUBLIC KEYWORD_CLASS IDENTIFIER
+SimpleClassHeader              : KEYWORD_CLASS IDENTIFIER {checkClassID(name);}
+                         | KEYWORD_PUBLIC KEYWORD_CLASS IDENTIFIER {checkClassID(name);}
                        ;
 MultipleVariablesDeclaration        : SimpleVariableDeclaration MultipleVariablesDeclaration
                        |
                        ;
-SimpleVariableDeclaration         : Variable SEMI_COLON
+SimpleVariableDeclaration         : Variable {checkVarID(name);initVar(name);} SEMI_COLON
                        ;
-InlineVariables              : Variable  COMMA InlineVariables
-                       | Variable 
+InlineVariables              : Variable {checkVarID(name);} COMMA InlineVariables
+                       | Variable {checkVarID(name);}
                        |
                        ;
-Variable               : Type IDENTIFIER
+Variable               : Type IDENTIFIER 
                        ;
 MultipleMethodsDeclaration     : MethodDeclaration MultipleMethodsDeclaration
                        |
                        ;
-MethodDeclaration      : KEYWORD_PUBLIC Variable PARENTHESIS_OPEN InlineVariables PARENTHESIS_CLOSE  CURLY_BRACKET_OPEN MultipleStatements  KEYWORD_RETURN Expression SEMI_COLON CURLY_BRACKET_CLOSE
+MethodDeclaration      : KEYWORD_PUBLIC Variable {checkFuncID(name);} PARENTHESIS_OPEN InlineVariables PARENTHESIS_CLOSE {funcDecEnd();}  CURLY_BRACKET_OPEN MultipleStatements  KEYWORD_RETURN Expression SEMI_COLON CURLY_BRACKET_CLOSE {endFunction();}
                        ;
 
-Type                   : TYPE_INT BRACKET_OPEN BRACKET_CLOSE 
-                       | TYPE_BOOLEAN 
-                       | TYPE_INT 
-                       | TYPE_STRING
+Type                   : TYPE_INT BRACKET_OPEN BRACKET_CLOSE {g_type = tInt;}
+                       | TYPE_BOOLEAN {g_type = tBoolean;}
+                       | TYPE_INT  {g_type = tInt;}
+                       | TYPE_STRING {g_type = tString;}
                        ;
 MultipleStatements             : Statement MultipleStatements
                        | Statement
@@ -111,13 +114,13 @@ MultipleStatements             : Statement MultipleStatements
 Literal                : STRING_LITERAL
                        | BOOLEAN_LITERAL
                        | INTEGER_LITERAL
-                       | IDENTIFIER
+                       | IDENTIFIER {checkID(name);}
                        ;
 Statement              : CURLY_BRACKET_OPEN MultipleStatements CURLY_BRACKET_CLOSE
                        | SimpleVariableDeclaration
-                       | Variable OP_AFFECT Expression SEMI_COLON
-                       | IDENTIFIER OP_AFFECT Literal SEMI_COLON
-                       | IDENTIFIER OP_AFFECT Statement
+                       | Literal SEMI_COLON
+                       | Variable {checkVarID(name);initVar(name);} OP_AFFECT Expression SEMI_COLON
+                       | IDENTIFIER  {checkID(name);} OP_AFFECT  Statement 
                        | Literal Arithmetic_Operator Expression SEMI_COLON
                        | KEYWORD_IF PARENTHESIS_OPEN Expression PARENTHESIS_CLOSE 
                             CURLY_BRACKET_OPEN MultipleStatements CURLY_BRACKET_CLOSE
@@ -131,7 +134,7 @@ Statement              : CURLY_BRACKET_OPEN MultipleStatements CURLY_BRACKET_CLO
                        | KEYWORD_PRINT PARENTHESIS_OPEN Expression PARENTHESIS_CLOSE SEMI_COLON
                        ;
 Expression             : INTEGER_LITERAL CompositeExpression
-                       | IDENTIFIER CompositeExpression
+                       | IDENTIFIER {checkID(name);}  CompositeExpression
                        | BOOLEAN_LITERAL CompositeExpression
                        | STRING_LITERAL CompositeExpression
                        | KEYWORD_THIS CompositeExpression
@@ -144,14 +147,14 @@ Expression             : INTEGER_LITERAL CompositeExpression
 CompositeExpression         : Arithmetic_Operator Expression CompositeExpression
                        | Logical_Operator Expression  CompositeExpression
                        | BRACKET_OPEN Expression BRACKET_CLOSE CompositeExpression
-                       | MethodCall PARENTHESIS_OPEN MultipleExpressions PARENTHESIS_CLOSE CompositeExpression
-                       | MethodCall PARENTHESIS_OPEN PARENTHESIS_CLOSE  CompositeExpression
+                       | MethodCall PARENTHESIS_OPEN MultipleExpressions PARENTHESIS_CLOSE{funcCallEnd();} CompositeExpression
+                       | MethodCall PARENTHESIS_OPEN PARENTHESIS_CLOSE {g_nbParam = 0;funcCallEnd();}  CompositeExpression
                        |
                        ;
-MethodCall             : DOT IDENTIFIER 
+MethodCall             : DOT IDENTIFIER {checkFuncIDDeclare(name);}
                        ;
-MultipleExpressions            : Expression COMMA MultipleExpressions
-                       | Expression 
+MultipleExpressions            : Expression{g_nbParam++;} COMMA MultipleExpressions
+                       | Expression {g_nbParam++;}
                        ;
 Arithmetic_Operator               : OP_ADD
                        | OP_MULTIPLY 
@@ -171,15 +174,28 @@ Logical_Operator                  : LOG_AND
 
 
 extern FILE *yyin;
-int yyerror(char const *msg) {
-	fprintf(stderr, "%s %d\n", msg,yylineno);
-	return 0;
-}
 int main(int argc, char **argv)
 {
     yyin = fopen(argv[1], "r");
+    beginSemantic();
     yyparse();
+    endSemantic();
     return 1;
 }
-
-
+void beginSemantic()
+{
+	table = NULL;
+	local_table = NULL;
+	class_table = NULL;
+	g_type = NODE_TYPE_UNKNOWN;
+	g_nbParam = 0;
+	g_IfFunc = 0 ;
+     g_IfFuncParameters = 0 ;
+     g_IfClass = 0 ;
+}
+void endSemantic()
+{
+     fclose(yyin);
+     destructSymbolsTable(local_table);
+	destructSymbolsTable(table);
+}
