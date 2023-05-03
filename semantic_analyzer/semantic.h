@@ -31,6 +31,7 @@ struct NODE
     int isInit;
     int isUsed;
     int nbParam;
+    int lineNumber;
     struct NODE *next;
 };
 typedef struct NODE *NODE;
@@ -44,7 +45,7 @@ void checkID(char *name);
 void checkVarID(char *name);
 int checkIDDeclare(char *name);
 void checkFuncIDDeclare(char *name);
-void initVar(char *name);
+void initVar(char *name,int lineNumber);
 void checkVarInitialise(char *name);
 void endFunction();
 void endClass();
@@ -56,9 +57,9 @@ void funcDecEnd();
 void funcCallEnd();
 void checkID(char *name);
 int checkIDDeclareOnInit(char *name);
-void checkIDOnInit(char *name);
+void checkIDOnInit(char *name,int lineNumber);
 char *concat(const char *s1, char *s2);
-void semanticWarning(char *str);
+void semanticWarning(char *str,int lineNumber);
 void semanticError(const char *str);
 
 #endif // SEMANTIC_H_INCLUDED

@@ -255,7 +255,7 @@ int checkIDDeclareOnInit (char* name){
     return 1;
 }
 
-void initVar (char* name){
+void initVar (char* name,int lineNumber){
     NODE node;
     if (g_IfFunc){
         node = search(name, local_table);
@@ -266,6 +266,7 @@ void initVar (char* name){
         node = search(name, table);
     }
     node->isInit = 1;
+    node->lineNumber = lineNumber;
 }
 
 void checkVarInitialise (char* name){
@@ -296,7 +297,7 @@ void endFunction()
     while( tmp_table!=NULL ){
         if (tmp_table->classs == variable && !tmp_table->isUsed)
         {
-            semanticWarning(tmp_table->name);
+            semanticWarning(tmp_table->name,tmp_table->lineNumber);
         }
         tmp_table = tmp_table->next;
     }
@@ -332,9 +333,9 @@ void checkFuncIDDeclare(char* name){
 
 
 
-void checkIDOnInit(char* name){
+void checkIDOnInit(char* name,int lineNumber){
     if(checkIDDeclareOnInit(name)) {
-        initVar(name);
+        initVar(name,lineNumber);
     }
 }
 

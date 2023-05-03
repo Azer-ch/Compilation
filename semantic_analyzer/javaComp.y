@@ -88,7 +88,7 @@ SimpleClassHeader              : KEYWORD_CLASS IDENTIFIER {checkClassID(name);}
 MultipleVariablesDeclaration        : SimpleVariableDeclaration MultipleVariablesDeclaration
                        |
                        ;
-SimpleVariableDeclaration         : Variable {checkVarID(name);initVar(name);} SEMI_COLON
+SimpleVariableDeclaration         : Variable {checkVarID(name);initVar(name,yylineno);} SEMI_COLON
                        ;
 InlineVariables              : Variable {checkVarID(name);} COMMA InlineVariables
                        | Variable {checkVarID(name);}
@@ -119,7 +119,7 @@ Literal                : STRING_LITERAL
 Statement              : CURLY_BRACKET_OPEN MultipleStatements CURLY_BRACKET_CLOSE
                        | SimpleVariableDeclaration
                        | Literal SEMI_COLON
-                       | Variable {checkVarID(name);initVar(name);} OP_AFFECT Expression SEMI_COLON
+                       | Variable {checkVarID(name);initVar(name,yylineno);} OP_AFFECT Expression SEMI_COLON
                        | IDENTIFIER  {checkID(name);} OP_AFFECT  Statement 
                        | Literal Arithmetic_Operator Expression SEMI_COLON
                        | KEYWORD_IF PARENTHESIS_OPEN Expression PARENTHESIS_CLOSE 
@@ -180,6 +180,14 @@ int main(int argc, char **argv)
     beginSemantic();
     yyparse();
     endSemantic();
+    if(errorCount == 0) {
+     fprintf(stdout,"File Compiled Successfully \n");
+     if(warningCount > 0)
+          fprintf(stdout,"Compiler terminated with %d warning(s)\n",warningCount);
+    }
+    else {
+     fprintf(stderr,"Compiler terminated with %d error(s) and %d warning(s)",errorCount,warningCount);
+    }
     return 1;
 }
 void beginSemantic()

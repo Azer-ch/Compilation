@@ -1550,7 +1550,7 @@ yyreduce:
 
   case 19:
 #line 91 "javaComp.y"
-                                             {checkVarID(name);initVar(name);}
+                                             {checkVarID(name);initVar(name,yylineno);}
 #line 1555 "javaComp.tab.c"
     break;
 
@@ -1616,7 +1616,7 @@ yyreduce:
 
   case 45:
 #line 122 "javaComp.y"
-                                  {checkVarID(name);initVar(name);}
+                                  {checkVarID(name);initVar(name,yylineno);}
 #line 1621 "javaComp.tab.c"
     break;
 
@@ -1906,6 +1906,14 @@ int main(int argc, char **argv)
     beginSemantic();
     yyparse();
     endSemantic();
+    if(errorCount == 0) {
+     fprintf(stdout,"File Compiled Successfully \n");
+     if(warningCount > 0)
+          fprintf(stdout,"Compiler terminated with %d warning(s)\n",warningCount);
+    }
+    else {
+     fprintf(stderr,"Compiler terminated with %d error(s) and %d warning(s)",errorCount,warningCount);
+    }
     return 1;
 }
 void beginSemantic()

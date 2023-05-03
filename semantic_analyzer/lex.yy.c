@@ -580,7 +580,7 @@ char *yytext;
  void yyerror(char const *msg);
  void lexicalError(char const *msg);
  void semanticError(char const *msg);
- void semanticWarning(char *msg);
+ void semanticWarning(char *msg,int lineNumber);
 #line 585 "lex.yy.c"
 #line 586 "lex.yy.c"
 
@@ -2161,11 +2161,8 @@ void semanticError (const char *str){
     sprintf(errstr,"Semantic error  : %s",str);
     yyerror(errstr);
 }
-void semanticWarning (char *nom){
+void semanticWarning (char *nom,int lineNumber){
     warningCount++;
-    char errstr[200];
-    sprintf(errstr,"Semantic warning : declared variable is not used: %s",nom);
-    yyerror(errstr);
-    errorCount--;
+    fprintf(stdout,"Semantic warning : declared variable is not used : %s at line %d\n",nom,lineNumber);
 }
 

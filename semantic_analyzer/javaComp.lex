@@ -12,7 +12,7 @@
  void yyerror(char const *msg);
  void lexicalError(char const *msg);
  void semanticError(char const *msg);
- void semanticWarning(char *msg);
+ void semanticWarning(char *msg,int lineNumber);
 %}
 
 %option yylineno
@@ -150,10 +150,7 @@ void semanticError (const char *str){
     sprintf(errstr,"Semantic error  : %s",str);
     yyerror(errstr);
 }
-void semanticWarning (char *nom){
+void semanticWarning (char *nom,int lineNumber){
     warningCount++;
-    char errstr[200];
-    sprintf(errstr,"Semantic warning : declared variable is not used: %s",nom);
-    yyerror(errstr);
-    errorCount--;
+    fprintf(stdout,"Semantic warning : declared variable is not used : %s at line %d\n",nom,lineNumber);
 }
