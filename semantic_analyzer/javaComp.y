@@ -151,7 +151,7 @@ CompositeExpression         : Arithmetic_Operator Expression CompositeExpression
                        | MethodCall PARENTHESIS_OPEN PARENTHESIS_CLOSE {g_nbParam = 0;funcCallEnd();}  CompositeExpression
                        |
                        ;
-MethodCall             : DOT IDENTIFIER {checkFuncIDDeclare(name);}
+MethodCall             : DOT IDENTIFIER 
                        ;
 MultipleExpressions            : Expression{g_nbParam++;} COMMA MultipleExpressions
                        | Expression {g_nbParam++;}

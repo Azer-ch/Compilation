@@ -1644,26 +1644,20 @@ yyreduce:
 #line 1645 "javaComp.tab.c"
     break;
 
-  case 73:
-#line 154 "javaComp.y"
-                                        {checkFuncIDDeclare(name);}
-#line 1651 "javaComp.tab.c"
-    break;
-
   case 74:
 #line 156 "javaComp.y"
                                            {g_nbParam++;}
-#line 1657 "javaComp.tab.c"
+#line 1651 "javaComp.tab.c"
     break;
 
   case 76:
 #line 157 "javaComp.y"
                                     {g_nbParam++;}
-#line 1663 "javaComp.tab.c"
+#line 1657 "javaComp.tab.c"
     break;
 
 
-#line 1667 "javaComp.tab.c"
+#line 1661 "javaComp.tab.c"
 
       default: break;
     }
