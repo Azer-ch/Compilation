@@ -34,6 +34,9 @@
     <li>
     <a href="#demo">Demo</a>
     </li>
+    <li>
+    <a href="#code-generation">Code generation</a>
+    </li>
   </ol>
 </details>
 
@@ -117,6 +120,33 @@ To get a local copy up and running follow these simple steps.
 <p align="center">
   <img src="demo/demo.gif" alt="animated" />
 </p>
+
+## Code generation
+
+The structure for the each instruction:
+
+![](code_gen/screenshots/1.png)
+
+The method for creation of an instruction:
+
+![](code_gen/screenshots/2.png)
+
+
+The method for the insertion of an instruction into the array of code:
+
+![](code_gen/screenshots/2.png)
+
+### Examples:
+
+
+Source code             |  Generated Code
+:-------------------------:|:-------------------------:
+![](code_gen/screenshots/1_code.png)  |  ![](code_gen/screenshots/1_code_gen.png)
+![](code_gen/screenshots/2_code.png)  |  ![](code_gen/screenshots/2_code_gen.png)
+
+
+### Demo
+![](demo/code_gen.gif)
 
 
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
