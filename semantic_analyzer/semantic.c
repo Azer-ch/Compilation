@@ -7,17 +7,15 @@ TABLE_NODE table, local_table, class_table;
 
 NODE g_node, g_nodeFunc, g_nodeClass;
 
-TYPE_IDENTIFIER g_type;
 int g_IfFunc;
 int g_IfFuncParameters;
 int g_IfClass;
 int g_nbParam;
 
-NODE create (const char* name, TYPE_IDENTIFIER type, CLASS classs, NODE next){
+NODE create (const char* name,  CLASS classs, NODE next){
     NODE node = (NODE)malloc(sizeof(struct NODE));
     node->name = (char *)malloc(strlen(name)+2);
     strcpy(node->name, name);
-    node->type = type;
     node->isUsed = 0;
     node->isInit = 0;
     node-> nbParam = 0;
@@ -68,74 +66,6 @@ void destructSymbolsTable( TABLE_NODE table )
 }
 
 
-void displaySymbolsTable( TABLE_NODE SymbolsTable ){
-    if( !SymbolsTable )
-        return;
-    NODE Node = SymbolsTable;
-    while( Node )
-    {
-        switch( Node->type )
-        {
-            case tInt :
-                printf("int ");
-                break;
-
-            case tBoolean :
-                printf("boolean ");
-                break;
-
-            case tString :
-                printf("string ");
-                break;
-
-            case tVoid :
-                printf("void ");
-                break;
-
-            case NODE_TYPE_UNKNOWN :
-                switch (Node->classs)
-                {
-                    case classs:
-                        printf("class ");
-                        break;
-
-                    default:
-                        break;
-                }
-                break;
-
-            default :
-                printf("Unknown ");
-        }
-
-        switch (Node->classs)
-        {
-            case variable:
-                printf("variable ");
-                break;
-
-            case parametre:
-                printf("parametre ");
-                break;
-
-            case function:
-                printf("function ");
-                break;
-            case attribute:
-                printf("attribute ");
-                break;
-            default:
-                break;
-        }
-
-        printf("%s %d %d", Node->name, Node->isUsed, Node->isInit);
-        printf("\n");
-
-        Node = Node->next;
-    }
-}
-
-
 void checkVarID (char* name){
     CLASS classs;
     if (g_IfFunc){
@@ -148,7 +78,7 @@ void checkVarID (char* name){
         if(search(name, local_table) ){
             semanticError(concat("variable identifier already defined: ", name));
         }else{
-            NODE node = create(name, g_type, classs, NULL);
+            NODE node = create(name, classs, NULL);
             local_table = insert(node, local_table);
 
         }
@@ -157,7 +87,7 @@ void checkVarID (char* name){
         if(search(name, table) ){
             semanticError(concat("attribute identifier already defined: ", name));
         }else{
-            NODE node = create(name, g_type, attribute, NULL);
+            NODE node = create(name, attribute, NULL);
             table = insert(node, table);
         }
     }
@@ -167,7 +97,7 @@ void checkFuncID (char* name){
          if( search(name, table) ){
                                 semanticError(concat("function  already defined: ", name));
                             }else{
-                                g_nodeFunc = create(name, g_type, function, NULL);
+                                g_nodeFunc = create(name,  function, NULL);
                                 table = insert(g_nodeFunc, table);
                             }
                             g_IfFunc = 1;
@@ -179,7 +109,7 @@ void checkClassID (char* name){
          if( search(name, class_table) ){
                                 semanticError(concat("class already defined: ", name));
                             }else{
-                                g_nodeClass = create(name, NODE_TYPE_UNKNOWN, classs, NULL);
+                                g_nodeClass = create(name, classs, NULL);
                                 class_table = insert(g_nodeClass, class_table);
                             }
                             g_IfClass = 1;
@@ -330,7 +260,16 @@ void checkFuncIDDeclare(char* name){
             g_nodeFunc=node;
         }
 }
-
+void checkClassIDDeclare(char *name){
+    NODE node;
+    node = search(name,class_table);
+    if(!node){
+        semanticError(concat("class not declared: ",name));
+        g_nodeClass = NULL;
+    }else{
+        g_nodeClass = node;
+    }
+}
 
 
 void checkIDOnInit(char* name,int lineNumber){

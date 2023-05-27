@@ -4,14 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef enum
-{
-    NODE_TYPE_UNKNOWN,
-    tInt,
-    tBoolean,
-    tString,
-    tVoid
-} TYPE_IDENTIFIER;
 
 typedef enum
 {
@@ -26,7 +18,6 @@ typedef enum
 struct NODE
 {
     char * name;
-    TYPE_IDENTIFIER type;
     CLASS classs;
     int isInit;
     int isUsed;
@@ -37,7 +28,7 @@ struct NODE
 typedef struct NODE *NODE;
 typedef NODE TABLE_NODE;
 
-NODE create(const char *name, TYPE_IDENTIFIER type, CLASS classe, NODE suivant);
+NODE create(const char *name,  CLASS classe, NODE suivant);
 NODE insert(NODE noeud, TABLE_NODE table);
 NODE search(const char *name, TABLE_NODE table);
 
@@ -45,12 +36,12 @@ void checkID(char *name);
 void checkVarID(char *name);
 int checkIDDeclare(char *name);
 void checkFuncIDDeclare(char *name);
+void checkClassIDDclare(char * name);
 void initVar(char *name,int lineNumber);
 void checkVarInitialise(char *name);
 void endFunction();
 void endClass();
 void destructSymbolsTable(TABLE_NODE SymbolsTable);
-void displaySymbolsTable(TABLE_NODE SymbolsTable);
 void checkFuncID(char *name);
 void checkClassID(char *name);
 void funcDecEnd();

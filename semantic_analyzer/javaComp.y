@@ -75,7 +75,7 @@ MainClass              : MainClassDeclaration MainClassBody
 NestedClassDeclaration	   : ClassDeclaration NestedClassDeclaration
                        |
                        ;
-MainClassDeclaration               : SimpleClassHeader CURLY_BRACKET_OPEN KEYWORD_PUBLIC KEYWORD_STATIC KEYWORD_VOID KEYWORD_MAIN{g_type = tVoid; checkFuncID("main");} PARENTHESIS_OPEN TYPE_STRING{g_type = tString;} BRACKET_OPEN BRACKET_CLOSE IDENTIFIER{checkVarID(name);} PARENTHESIS_CLOSE{funcDecEnd();}
+MainClassDeclaration               : SimpleClassHeader CURLY_BRACKET_OPEN KEYWORD_PUBLIC KEYWORD_STATIC KEYWORD_VOID KEYWORD_MAIN{checkFuncID("main");} PARENTHESIS_OPEN TYPE_STRING BRACKET_OPEN BRACKET_CLOSE IDENTIFIER{checkVarID(name);} PARENTHESIS_CLOSE{funcDecEnd();}
                        ;
 MainClassBody               :  CURLY_BRACKET_OPEN MultipleStatements  CURLY_BRACKET_CLOSE{endFunction();} MultipleMethodsDeclaration CURLY_BRACKET_CLOSE{endClass();}
                        ;
@@ -102,10 +102,10 @@ MultipleMethodsDeclaration     : MethodDeclaration MultipleMethodsDeclaration
 MethodDeclaration      : KEYWORD_PUBLIC Variable {checkFuncID(name);} PARENTHESIS_OPEN InlineVariables PARENTHESIS_CLOSE {funcDecEnd();}  CURLY_BRACKET_OPEN MultipleStatements  KEYWORD_RETURN Expression SEMI_COLON CURLY_BRACKET_CLOSE {endFunction();}
                        ;
 
-Type                   : TYPE_INT BRACKET_OPEN BRACKET_CLOSE {g_type = tInt;}
-                       | TYPE_BOOLEAN {g_type = tBoolean;}
-                       | TYPE_INT  {g_type = tInt;}
-                       | TYPE_STRING {g_type = tString;}
+Type                   : TYPE_INT BRACKET_OPEN BRACKET_CLOSE 
+                       | TYPE_BOOLEAN 
+                       | TYPE_INT  
+                       | TYPE_STRING 
                        ;
 MultipleStatements             : Statement MultipleStatements
                        | Statement
@@ -195,7 +195,6 @@ void beginSemantic()
 	table = NULL;
 	local_table = NULL;
 	class_table = NULL;
-	g_type = NODE_TYPE_UNKNOWN;
 	g_nbParam = 0;
 	g_IfFunc = 0 ;
      g_IfFuncParameters = 0 ;

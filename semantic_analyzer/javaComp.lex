@@ -135,6 +135,7 @@ ERROR_COMMENT                   \/\*([^(\*\/)]|\n)*
 void yyerror(char const *msg) {
      errorCount++;
 	fprintf(stderr, "%s at line %d\n",msg,yylineno);
+     exit(0);
 }
 int yywrap()
 {

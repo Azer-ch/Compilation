@@ -15,5 +15,11 @@ def compile():
     output_data_suc = subprocess.run([compile],input=code.encode(),stdout=subprocess.PIPE).stdout.decode()
     output_data_suc = output_data_suc.replace(' ', '&nbsp;').replace('\n', '<br>');
     return render_template('index.html',compiler_output_err = output_data_err,compiler_output_suc=output_data_suc, input_code = code)
+@app.route('/file' , methods = ['POST'])
+def uploadFile():
+    f = request.files['file']
+    f.save(f.filename)
+    source_code = open(f.filename,"r").read()
+    return render_template('index.html',input_code=source_code)
 if __name__ == '__main__':
     app.run(debug= True , use_reloader = True)

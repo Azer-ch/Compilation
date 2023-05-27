@@ -6,6 +6,12 @@ body {
 .CodeMirror {
   height: 500px;
 }
+.upload-btn {
+  border-style: none;
+  padding: 10px;
+  background: #2e3440;
+  color: white;
+}
 button {
   border-style: none;
   padding: 10px;
